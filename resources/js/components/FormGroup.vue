@@ -79,6 +79,7 @@
                             class="block w-8 h-8 border-l border-gray-200 group-control btn dark:border-gray-700"
                             :title="__('Move down')"
                             @click.prevent="moveDown"
+                            @file-deleted="$emit('file-deleted')"
                         >
                             <icon
                                 type="arrow-down"

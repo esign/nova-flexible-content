@@ -7,6 +7,7 @@ use Laravel\Nova\Resource;
 use Laravel\Nova\Fields\Field;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use SebastianBergmann\Template\Template;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\Nova\Flexible\Layouts\Preset;
@@ -157,6 +158,26 @@ class Flexible extends Field
     public function simpleMenu()
     {
         return $this->menu('flexible-drop-menu');
+    }
+
+    /**
+     * Get the field layouts.
+     *
+     * @return Collection
+     */
+    public function layouts()
+    {
+        return $this->layouts;
+    }
+
+    /**
+     * Get the field groups.
+     *
+     * @return Collection
+     */
+    public function groups()
+    {
+        return $this->groups;
     }
 
     /**
@@ -346,6 +367,24 @@ class Flexible extends Field
         $this->withMeta(['collapsed' => $value]);
 
         return $this;
+    }
+
+    public static function deleteFile(NovaRequest $request, $model, $field)
+    {
+        $path = explode('.', $field->group->originalField);
+        $path[] = 'attributes';
+        $path[] = $field->attribute;
+
+        $mainField = array_shift($path);
+        $data = $model->{$mainField};
+        if (is_string($data)) {
+            $data = json_decode($data, true);
+        }
+        Arr::set($data, implode('.', $path), '');
+
+        return [
+            $mainField => json_encode($data),
+        ];
     }
 
     /**
