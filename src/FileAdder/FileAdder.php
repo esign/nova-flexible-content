@@ -1,9 +1,13 @@
 <?php
 
-namespace Whitecube\NovaFlexibleContent\FileAdder;
+namespace Marshmallow\Nova\Flexible\FileAdder;
 
-use Spatie\MediaLibrary\MediaCollections\FileAdder as OriginalFileAdder;
+use Spatie\MediaLibrary\Helpers\File;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileIsTooBig;
+use Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\DiskDoesNotExist;
+use Spatie\MediaLibrary\Exceptions\FileCannotBeAdded\FileDoesNotExist;
+use Spatie\MediaLibrary\MediaCollections\FileAdder as OriginalFileAdder;
 
 class FileAdder extends OriginalFileAdder
 {

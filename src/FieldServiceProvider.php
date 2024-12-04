@@ -1,15 +1,16 @@
 <?php
 
-namespace Whitecube\NovaFlexibleContent;
+namespace Marshmallow\Nova\Flexible;
 
-use Illuminate\Support\ServiceProvider;
-use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Nova;
-use Whitecube\NovaFlexibleContent\Commands\CreateCast;
-use Whitecube\NovaFlexibleContent\Commands\CreateLayout;
-use Whitecube\NovaFlexibleContent\Commands\CreatePreset;
-use Whitecube\NovaFlexibleContent\Commands\CreateResolver;
-use Whitecube\NovaFlexibleContent\Http\Middleware\InterceptFlexibleAttributes;
+use Laravel\Nova\Events\ServingNova;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\ServiceProvider;
+use Marshmallow\Nova\Flexible\Commands\LayoutCommand;
+use Marshmallow\Nova\Flexible\Commands\MakeLayoutCommand;
+use Marshmallow\Nova\Flexible\Http\Middleware\InterceptFlexibleAttributes;
+use Marshmallow\Nova\Flexible\Layouts\MarshmallowLayout;
+use Marshmallow\Nova\Flexible\Layouts\MarshmallowMediaLayout;
 
 class FieldServiceProvider extends ServiceProvider
 {
@@ -23,9 +24,15 @@ class FieldServiceProvider extends ServiceProvider
         $this->addMiddleware();
 
         Nova::serving(function (ServingNova $event) {
-            Nova::script('nova-flexible-content', __DIR__.'/../dist/js/field.js');
-            Nova::style('nova-flexible-content', __DIR__.'/../dist/css/field.css');
+            Nova::script('nova-flexible-content', __DIR__ . '/../dist/js/field.js');
+            Nova::style('nova-flexible-content', __DIR__ . '/../dist/css/field.css');
         });
+
+        $this->publishes([
+            __DIR__ . '/../config/flexible.php' => config_path('flexible.php'),
+        ]);
+
+        Cache::forget("marshmallow.flexible-layouts-cache");
     }
 
     /**
@@ -35,15 +42,18 @@ class FieldServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if (! $this->app->runningInConsole()) {
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/flexible.php',
+            'flexible'
+        );
+
+        if (!$this->app->runningInConsole()) {
             return;
         }
 
         $this->commands([
-            CreateCast::class,
-            CreateLayout::class,
-            CreatePreset::class,
-            CreateResolver::class,
+            LayoutCommand::class,
+            MakeLayoutCommand::class,
         ]);
     }
 
@@ -62,7 +72,7 @@ class FieldServiceProvider extends ServiceProvider
             return;
         }
 
-        if (! $this->app->configurationIsCached()) {
+        if (!$this->app->configurationIsCached()) {
             config()->set('nova.middleware', array_merge(
                 config('nova.middleware', []),
                 [InterceptFlexibleAttributes::class]

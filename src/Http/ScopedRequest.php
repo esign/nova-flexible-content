@@ -1,32 +1,18 @@
 <?php
 
-namespace Whitecube\NovaFlexibleContent\Http;
+namespace Marshmallow\Nova\Flexible\Http;
 
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class ScopedRequest extends NovaRequest
 {
     /**
-     * The group's key.
-     *
-     * @var string
-     */
-    public $group;
-
-    /**
-     * The original file input attributes.
-     *
-     * @var array
-     */
-    protected $fileAttributes = [];
-
-    /**
      * Create a copy of the given request, only containing the group's input
      *
      * @param  \Laravel\Nova\Http\Requests\NovaRequest  $from
      * @param  array  $attributes
      * @param  string  $group
-     * @return \Whitecube\NovaFlexibleContent\Http\ScopedRequest
+     * @return \Marshmallow\Nova\Flexible\Http\ScopedRequest
      */
     public static function scopeFrom(NovaRequest $from, $attributes, $group)
     {

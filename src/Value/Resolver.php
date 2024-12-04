@@ -1,22 +1,24 @@
 <?php
 
-namespace Whitecube\NovaFlexibleContent\Value;
+namespace Marshmallow\Nova\Flexible\Value;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Marshmallow\Nova\Flexible\Layouts\Collection as LayoutsCollection;
 
 class Resolver implements ResolverInterface
 {
     /**
      * Save the Flexible field's content somewhere the get method will be able to access it.
      *
-     * @param  mixed  $resource
-     * @param  string  $attribute
-     * @param  \Illuminate\Support\Collection  $groups
+     * @param  mixed  $model
+     * @param  string $attribute
+     * @param  \Illuminate\Support\Collection $groups
      * @return string
      */
     public function set($resource, $attribute, $groups)
     {
-        return $resource->$attribute = $groups->map(function ($group) {
+        return $model->$attribute = $groups->map(function ($group) {
             return [
                 'layout' => $group->name(),
                 'key' => $group->key(),
@@ -29,9 +31,9 @@ class Resolver implements ResolverInterface
      * Resolve the Flexible field's content.
      *
      * @param  mixed  $resource
-     * @param  string  $attribute
-     * @param  \Whitecube\NovaFlexibleContent\Layouts\Collection  $layouts
-     * @return \Illuminate\Support\Collection<int, \Whitecube\NovaFlexibleContent\Layouts\Layout>
+     * @param  string $attribute
+     * @param  \Marshmallow\Nova\Flexible\Layouts\Collection $layouts
+     * @return \Illuminate\Support\Collection
      */
     public function get($resource, $attribute, $layouts)
     {
@@ -40,7 +42,7 @@ class Resolver implements ResolverInterface
         return collect($value)->map(function ($item) use ($layouts) {
             $layout = $layouts->find($item->layout);
 
-            if (! $layout) {
+            if (!$layout) {
                 return null;
             }
 
@@ -66,7 +68,7 @@ class Resolver implements ResolverInterface
         }
 
         // Fail silently in case data is invalid
-        if (! is_array($value)) {
+        if (!is_array($value)) {
             return [];
         }
 

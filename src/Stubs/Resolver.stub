@@ -2,17 +2,17 @@
 
 namespace App\Nova\Flexible\Resolvers;
 
-use Whitecube\NovaFlexibleContent\Value\ResolverInterface;
+use Marshmallow\Nova\Flexible\Value\ResolverInterface;
 
 class :classname implements ResolverInterface
 {
     /**
-     * Resolve the Flexible field's content.
+     * get the field's value
      *
      * @param  mixed  $resource
-     * @param  string  $attribute
-     * @param  \Whitecube\NovaFlexibleContent\Layouts\Collection  $layouts
-     * @return  \Illuminate\Support\Collection<array-key, \Whitecube\NovaFlexibleContent\Layouts\Layout>
+     * @param  string $attribute
+     * @param  Marshmallow\Nova\Flexible\Layouts\Collection $layouts
+     * @return Illuminate\Support\Collection
      */
     public function get($resource, $attribute, $layouts)
     {
@@ -20,15 +20,15 @@ class :classname implements ResolverInterface
     }
 
     /**
-     * Save the Flexible field's content somewhere the get method will be able to access it.
+     * Set the field's value
      *
-     * @param  mixed  $resource
-     * @param  string  $attribute Attribute name set for a Flexible field.
-     * @param  \Illuminate\Support\Collection<int, \Whitecube\NovaFlexibleContent\Layouts\Layout>  $groups
-     * @return  mixed
+     * @param  mixed  $model
+     * @param  string $attribute
+     * @param  \Illuminate\Support\Collection $groups
+     * @return string
      */
-    public function set($resource, $attribute, $groups)
+    public function set($model, $attribute, $groups)
     {
-        
+
     }
 }

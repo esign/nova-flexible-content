@@ -2,7 +2,7 @@
     <Modal :show="true">
         <form
             @submit.prevent="$emit('confirm')"
-            class="mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+            class="mx-auto overflow-hidden bg-white rounded-lg shadow-lg dark:bg-gray-800"
         >
             <slot>
                 <ModalHeader v-text="__('Delete Group')" />
@@ -28,16 +28,15 @@
                         {{ no }}
                     </link-button>
 
-                    <Button
+                    <danger-button
                         ref="confirmButton"
                         dusk="confirm-delete-button"
-                        :loading="working"
+                        :processing="working"
                         :disabled="working"
-                        state="danger"
                         type="submit"
                     >
                         {{ yes }}
-                    </Button>
+                    </danger-button>
                 </div>
             </ModalFooter>
         </form>
@@ -45,14 +44,10 @@
 </template>
 
 <script>
-    import { Button } from 'laravel-nova-ui';
-
     export default {
         props: ["message", "yes", "no"],
 
         emits: ["close", "confirm"],
-
-        components: { Button },
 
         /**
          * Mount the component.

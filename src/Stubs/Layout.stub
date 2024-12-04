@@ -1,35 +1,68 @@
 <?php
 
-namespace App\Nova\Flexible\Layouts;
+namespace App\Flexible\Layouts{{subdirectory}};
 
-use Whitecube\NovaFlexibleContent\Layouts\Layout;
+use Laravel\Nova\Fields\Text;
+use Marshmallow\Nova\Flexible\Layouts\MarshmallowLayout;
 
-class :classname extends Layout
+class {{class}} extends MarshmallowLayout
 {
     /**
      * The layout's unique identifier
      *
      * @var string
      */
-    protected $name = ':name';
+    protected $name = '{{name}}';
 
     /**
      * The displayed title
      *
      * @var string
      */
-    protected $title = ':classname';
+    protected $title = '{{title}}';
+
+    /**
+     * Description as shown in the layout selector.
+     *
+     * @var string
+     */
+    protected $description = 'No description available';
+
+    /**
+     * Image use in the layout selector
+     *
+     * @var string
+     */
+    protected $image = 'https://marshmallow.dev/cdn/flex/layout/containers.png';
+
+    /**
+     * Add this layout to these tags.
+     *
+     * @var array<string>
+     */
+    protected $tags = [{{tags}}];
 
     /**
      * Get the fields displayed by the layout.
      *
-     * @return array
+     * @return array<\Laravel\Nova\Fields\Field>
      */
     public function fields()
     {
         return [
             // Define the layout's fields.
+            // Text::make(__('Title'), 'title'),
         ];
     }
 
+    /**
+     * Get the Component class that handles the views
+     * for this layout
+     *
+     * @return string Class of the compontent class
+     */
+    protected function getComponentClass()
+    {
+        return {{component_class_path}};
+    }
 }

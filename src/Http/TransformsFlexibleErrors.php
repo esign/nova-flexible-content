@@ -1,10 +1,11 @@
 <?php
 
-namespace Whitecube\NovaFlexibleContent\Http;
+namespace Marshmallow\Nova\Flexible\Http;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Lang;
-use Illuminate\Support\Str;
+use Marshmallow\Nova\Flexible\Flexible;
 use Symfony\Component\HttpFoundation\Response;
 use Whitecube\NovaFlexibleContent\Flexible;
 
@@ -84,8 +85,8 @@ trait TransformsFlexibleErrors
      * Update human error messages with correct field names
      *
      * @param  array  $messages
-     * @param  string  $key
-     * @param  \Whitecube\NovaFlexibleContent\Http\FlexibleAttribute  $attribute
+     * @param  string $key
+     * @param  \Marshmallow\Nova\Flexible\Http\FlexibleAttribute  $attribute
      * @return array
      */
     protected function transformMessages($messages, $key, $attribute)

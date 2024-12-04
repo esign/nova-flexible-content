@@ -1,123 +1,197 @@
-# ![Laravel Nova Flexible Content](https://github.com/whitecube/nova-flexible-content/raw/master/title.png)
+# Esign Nova Flexible
 
-![](https://img.shields.io/github/release/whitecube/nova-flexible-content.svg?style=flat)
-[![](https://img.shields.io/packagist/dt/whitecube/nova-flexible-content.svg?colorB=green&style=flat)](https://packagist.org/packages/whitecube/nova-flexible-content)
-[![](https://img.shields.io/github/license/whitecube/nova-flexible-content.svg?style=flat)](https://github.com/whitecube/nova-flexible-content/blob/master/LICENSE)
+This is a fork from the package of `whitecube/nova-flexible-content`. This is forked so we can build are own functionalities in to this and make it optimal for our customers.
 
-An easy & complete Flexible Field for Laravel Nova, perfect for repeated and flexible field groups.
+## Installation
 
-![Laravel Nova Flexible Content in action](https://user-images.githubusercontent.com/9298484/164532562-6e4e4179-8a53-470c-97c8-237e9a2c2ebb.gif)
-
-## We are looking for someone to help us maintain this package!
-
-We'd love to accept someone who uses this package a lot to help us review and merge incoming PRs. Shoot us a message at hello@whitecube.be if you're willing to help!
+```bash
+composer require esign/nova-flexible-content
+```
 
 ## Quick start
 
 Here's a very condensed guide to get you started asap.
 See the full docs at [https://whitecube.github.io/nova-flexible-content](https://whitecube.github.io/nova-flexible-content)
 
-### Install
+To use the MarshmallowMediaLayout, this packages requires 'spatie/laravel-medialibrary', see the insturctions for installation on the [spatie website](https://spatie.be/docs/laravel-medialibrary/v10/installation-setup)
+For Nova use 'marshmallow/advanced-nova-media-library' and follow the instructions on the [github page](https://github.com/marshmallow-packages/advanced-nova-media-library)
 
+## Table of Contents
+
+-   [Prepare](#Prepare)
+    -   [Nova Resource](#Prepare)
+    -   [Models](#Models)
+-   [Commands](#Commands)
+-   [Customize](#Customize)
+    -   [Title on Layout classes](#Customize)
+    -   [Title on custom layouts](#Customize)
+    -   ['Config methods'](#ConfigMethods)
+-   [Helpers](#Helpers)
+
+## Commands
+
+### Create layout
+
+To create a new layout you can run the command below.
+
+```bash
+php artisan make:flex Element\\Counter --livewire
 ```
-composer require whitecube/nova-flexible-content
+
+### Create templates
+
+```bash
+php artisan make:flex Forms\\Newsletter --template=newsletter
+php artisan make:flex Forms\\Contact --template=form
 ```
 
-### Usage
+## Prepare
 
-A flexible field allows easy management of repeatable and orderable groups of fields. As opposed to the few existing solutions for Laravel Nova, this one does not have constraints on which fields you are allowed to use within these groups. That means you can use all Laravel Nova field types, and also any community-made fields.
+### Nova Resource
 
-#### Adding layouts
+You can use the `getFlex()` method to get all the layouts that are provided with this package and the layouts that you created yourself. If you want to manualy add flexibles to your Nova resource, please reference the manual usage section of this readme.
 
-A layout represents a group of fields that can be repeated inside the Flexible field. You can add as many layouts as you wish. If only one layout is defined the field will behave like a simple Repeater and by adding more layouts you'll obtain a Flexible Content. Both concepts are similar to [their cousins in Wordpress' ACF Plugin](https://www.advancedcustomfields.com/add-ons/).
-
-Layouts can be added using the following method on your Flexible fields:
 ```php
- addLayout(string $title, string $name, array $fields)
+class Page extends Resource
+{
+	use \Marshmallow\Nova\Flexible\Nova\Traits\HasFlexable;
+
+	public function fields(Request $request)
+	{
+		return [
+			// ...
+			$this->getFlex(),
+			// ...
+		];
+	}
+}
 ```
 
-The `$name` parameter is used to store the chosen layout in the field's value. Choose it wisely, you'll probably use it to identify the layouts in your application.
+### Models
+
+Make sure your model will cast this data correctly by adding this to the field of your model.
 
 ```php
-use Whitecube\NovaFlexibleContent\Flexible;
+class Page extends Model
+{
+	use \Marshmallow\Nova\Flexible\Concerns\HasFlexible;
+
+	protected $casts = [
+		/**
+		 * 'layout' in the example below references the field
+		 * in the model where the json is stored.
+		 */
+		'layout' => \Marshmallow\Nova\Flexible\Casts\FlexibleCast::class,
+	];
+}
+```
+
+## Customize
+
+### Title on Layout classes
+
+Sometimes its very hard to see which group is what because all items look the same. It is possible to get a value from one of the fields to be displayed in the group overview. By default the `title` field will be used but it can be overriten.
+
+```php
+// Layout class
+// In a layout class you just set the $titleFromContent property to the field name you
+// wish it shows.
+protected $titleFromContent = 'title';
+```
+
+### Title on custom layouts
+
+```php
+/**
+ * For custom layout, we need to add a 4th parameter. This should be a callable and call the setTitleFromContent method.
+ */
+->addLayout(
+	'Mr. Mallow',
+	'mr_mallow', [
+        Text::make('Title', 'title'),
+        Text::make('Sub title', 'sub_title'),
+        // ...
+	],
+	function ($layout) {
+		return $layout->setTitleFromContent('sub_title');
+    }
+)
+
 
 /**
- * Get the fields displayed by the resource.
- *
- * @param  \Illuminate\Http\Request  $request
- * @return array
+ * You can also use a callback to build your title.
  */
-public function fields(Request $request)
-{
-    return [
+->addLayout(
+	'Mr. Mallow',
+	'mr_mallow', [
+        Text::make('Title', 'title'),
+        Date::make('Date', 'date'),
+        Textarea::make('Content', 'content'),
         // ...
-
-        Flexible::make('Content')
-            ->addLayout('Simple content section', 'wysiwyg', [
-                Text::make('Title'),
-                Markdown::make('Content')
-            ])
-            ->addLayout('Video section', 'video', [
-                Text::make('Title'),
-                Image::make('Video Thumbnail', 'thumbnail'),
-                Text::make('Video ID (YouTube)', 'video'),
-                Text::make('Video Caption', 'caption')
-            ])
-    ];
-}
+	],
+	function ($layout) {
+		return $layout->resolveTitleUsing(function ($title, $date, $content) {
+            return $title . ' ' . Carbon::parse($date)->format('Y-m-d');
+        });
+    }
+)
 ```
-![Example of Flexible layouts](https://user-images.githubusercontent.com/9298484/164533823-1b1b4934-75b8-49f2-92a0-a54812ccf463.png)
 
+<a id="ConfigMethods"></a>
 
-#### Customizing the button label
+## Config Methods
 
-You can change the default "Add layout" button's text like so:
+You can call a load config method once you've created your flexible field to change the behaviour of the flexible field. Below you will find some examples.
 
 ```php
-Flexible::make('Content')
-    ->button('Add something amazing!');
+$this->getFlex(__('Layout'), 'layout')
+    ->loadConfig([
+        'simpleView' => null,
+        'allowedToCreate' => ['allowed' => true|false],
+        'allowedToDelete' => ['allowed' => true|false],
+        'allowedToChangeOrder' => ['allowed' => true|false],
+        'simpleMenu' => null,
+        'button' => ['label' => 'Button Label'],
+        'fullWidth' => ['fullWidth' => true|false],
+        'limit' => ['limit' => 3],
+    ]),
 ```
 
-![Add something amazing](https://user-images.githubusercontent.com/9298484/164544726-2a2b1ce5-aa19-489c-abee-b877e7e8d445.png)
+## Helpers
 
-
-### Using Flexible values in views
-
-If you are using Laravel 6 and under, or don't want to use casts, please [use an accessor on your model with the HasFlexible trait](https://whitecube.github.io/nova-flexible-content/#/?id=with-the-hasflexible-trait).
-
-Laravel 7 brings custom casts to the table, and flexible content fields are the perfect use case for them. The field stores its values as a single JSON string, meaning this string needs to be parsed before it can be used in your application. This can be done trivially by using the `FlexibleCast` class in this package:
+You can overrule a lot of defaults with the methods below.
 
 ```php
-namespace App;
+Flexible::make(__('Marshmallow'), 'marshmallow')
+    ->addLayout(__('Mr. Mallow'), 'mr_mallow', [
+        //
+    ])
 
-use Illuminate\Database\Eloquent\Model;
-use Whitecube\NovaFlexibleContent\Value\FlexibleCast;
+    // Don't use the component selector but a simple dropdown menu
+    ->simpleMenu()
 
-class MyModel extends Model
-{
-    protected $casts = [
-        'flexible-content' => FlexibleCast::class
-    ];
-}
+    // Use the full with of the nova container
+    ->fullWidth()
+
+    // Collapse all layouts when they are loaded
+    ->collapsed()
+
+    // Change the text in the add more layouts button
+    ->button(__('Add comment'))
+
+    // Disable deleting items
+    ->deletionNotAllowed();
 ```
 
-By default, the `FlexibleCast` class will collect basic `Layout` instances. If you want to map the layouts into [Custom Layout instances](https://github.com/whitecube/nova-flexible-content#custom-layout-classes), it is also possible. First, create a custom flexible cast by running `php artisan flexible:cast MyFlexibleCast`. This will create the file in the `App\Casts` directory.
+---
 
-Then easily map your custom layout classes to the proper keys:
+## Credits
 
-```php
-namespace App\Casts;
+See https://github.com/whitecube/nova-flexible-content - [Whitecube](https://github.com/whitecube)
 
-class MyFlexibleCast extends FlexibleCast
-{
-    protected $layouts = [
-        'wysiwyg' => \App\Nova\Flexible\Layouts\WysiwygLayout::class,
-        'video' => \App\Nova\Flexible\Layouts\VideoLayout::class,
-    ]
-}
-```
+Copyright (c) 2020 marshmallow.
 
-If you need more control, you can [override the `getLayoutMappings` method](https://whitecube.github.io/nova-flexible-content/#/?id=having-more-control-over-the-layout-mappings) instead.
+## License
 
 #### The Layouts Collection
 
@@ -145,29 +219,29 @@ When using the Flexible Content field, you'll quickly come across of some use ca
 
 ### Custom Layout Classes
 
-Sometimes, `addLayout` definitions can get quite long, or maybe you want them to be shared with other `Flexible` fields. The answer to this is to extract your Layout into its own class. [See the docs for more information on this](https://whitecube.github.io/nova-flexible-content/#/?id=custom-layout-classes).
+Sometimes, `addLayout` definitions can get quite long, or maybe you want them to be shared with other `Flexible` fields. The answer to this is to extract your Layout into its own class. [See the docs for more information on this](https://Marshmallow.github.io/nova-flexible-content/#/?id=custom-layout-classes).
 
 ### Predefined Preset Classes
 
-In addition to reusable Layout classes, you can go a step further and create `Preset` classes for your Flexible fields. These allow you to reuse your whole Flexible field anywhere you want. They also make it easier to make your Flexible fields dynamic, for example if you want to add Layouts conditionally. And last but not least, they also have the added benefit of cleaning up your Nova Resource classes, if your Flexible field has a lot of `addLayout` definitions. [See the docs for more information on this](https://whitecube.github.io/nova-flexible-content/#/?id=predefined-preset-classes).
+In addition to reusable Layout classes, you can go a step further and create `Preset` classes for your Flexible fields. These allow you to reuse your whole Flexible field anywhere you want. They also make it easier to make your Flexible fields dynamic, for example if you want to add Layouts conditionally. And last but not least, they also have the added benefit of cleaning up your Nova Resource classes, if your Flexible field has a lot of `addLayout` definitions. [See the docs for more information on this](https://Marshmallow.github.io/nova-flexible-content/#/?id=predefined-preset-classes).
 
 ### Custom Resolver Classes
 
 By default, the field takes advantage of a **JSON column** on your model's table. In some cases, you'd really like to use this field, but for some reason a JSON attribute is just not the way to go. For example, you could want to store the values in another table (meaning you'll be using the Flexible Content field instead of a traditional BelongsToMany or HasMany field). No worries, we've got you covered!
 
-Tell the field how to store and retrieve its content by creating your own Resolver class, which basically just contains two simple methods: `get` and `set`. [See the docs for more information on this](https://whitecube.github.io/nova-flexible-content/#/?id=custom-resolver-classes).
+Tell the field how to store and retrieve its content by creating your own Resolver class, which basically just contains two simple methods: `get` and `set`. [See the docs for more information on this](https://Marshmallow.github.io/nova-flexible-content/#/?id=custom-resolver-classes).
 
 ### Usage with nova-page
 
-Maybe you heard of one of our other packages, [nova-page](https://github.com/whitecube/nova-page), which is a Nova Tool that allows to edit static pages such as an _"About"_ page (or similar) without having to declare a model for it individually. More often than not, the Flexible Content Field comes in handy. Don't worry, both packages work well together! First create a [nova page template](https://github.com/whitecube/nova-page#creating-templates) and add a [flexible content](https://github.com/whitecube/nova-flexible-content#adding-layouts) to the template's fields.
+Maybe you heard of one of our other packages, [nova-page](https://github.com/Marshmallow/nova-page), which is a Nova Tool that allows to edit static pages such as an _"About"_ page (or similar) without having to declare a model for it individually. More often than not, the Flexible Content Field comes in handy. Don't worry, both packages work well together! First create a [nova page template](https://github.com/Marshmallow/nova-page#creating-templates) and add a [flexible content](https://github.com/Marshmallow/nova-flexible-content#adding-layouts) to the template's fields.
 
-As explained in the documentation, you can [access nova-page's static content](https://github.com/whitecube/nova-page#accessing-the-data-in-your-views) in your blade views using `{{ Page::get('attribute') }}`. When requesting the flexible content like this, it returns a raw JSON string describing the flexible content, which is of course not very useful. Instead, you can simply implement the `Whitecube\NovaFlexibleContent\Concerns\HasFlexible` trait on your page Templates, which will expose the `Page::flexible('attribute')` facade method and will take care of the flexible content's transformation.
+As explained in the documentation, you can [access nova-page's static content](https://github.com/Marshmallow/nova-page#accessing-the-data-in-your-views) in your blade views using `{{ Page::get('attribute') }}`. When requesting the flexible content like this, it returns a raw JSON string describing the flexible content, which is of course not very useful. Instead, you can simply implement the `Marshmallow\Nova\Flexible\Concerns\HasFlexible` trait on your page Templates, which will expose the `Page::flexible('attribute')` facade method and will take care of the flexible content's transformation.
 
 ```php
 namespace App\Nova\Templates;
 
 // ...
-use Whitecube\NovaFlexibleContent\Concerns\HasFlexible;
+use Marshmallow\Nova\Flexible\Concerns\HasFlexible;
 
 class Home extends Template
 {
@@ -179,7 +253,7 @@ class Home extends Template
 
 ## 💖 Sponsorships
 
-If you are reliant on this package in your production applications, consider [sponsoring us](https://github.com/sponsors/whitecube)! It is the best way to help us keep doing what we love to do: making great open source software.
+If you are reliant on this package in your production applications, consider [sponsoring us](https://github.com/sponsors/Marshmallow)! It is the best way to help us keep doing what we love to do: making great open source software.
 
 ## Contributing
 
@@ -195,7 +269,7 @@ Run PHPUnit by calling `composer test`.
 
 ## Made with ❤️ for open source
 
-At [Whitecube](https://www.whitecube.be) we use a lot of open source software as part of our daily work.
+At [Marshmallow](https://www.Marshmallow.be) we use a lot of open source software as part of our daily work.
 So when we have an opportunity to give something back, we're super excited!
 
-We hope you will enjoy this small contribution from us and would love to [hear from you](mailto:hello@whitecube.be) if you find it useful in your projects. Follow us on [Twitter](https://twitter.com/whitecube_be) for more updates!
+We hope you will enjoy this small contribution from us and would love to [hear from you](mailto:hello@Marshmallow.be) if you find it useful in your projects. Follow us on [Twitter](https://twitter.com/Marshmallow_be) for more updates!

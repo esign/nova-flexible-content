@@ -1,9 +1,10 @@
 <?php
 
-namespace Whitecube\NovaFlexibleContent\Value;
+namespace Marshmallow\Nova\Flexible\Value;
 
+use Marshmallow\Nova\Flexible\Concerns\HasFlexible;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
-use Whitecube\NovaFlexibleContent\Concerns\HasFlexible;
+use Marshmallow\Nova\Flexible\Layouts\Defaults\WysiwygLayout;
 
 class FlexibleCast implements CastsAttributes
 {
@@ -12,7 +13,9 @@ class FlexibleCast implements CastsAttributes
     /**
      * @var array
      */
-    protected $layouts = [];
+    protected $layouts = [
+        'wysiwyg' => WysiwygLayout::class,
+    ];
 
     /**
      * @var \Illuminate\Database\Eloquent\Model
@@ -20,7 +23,7 @@ class FlexibleCast implements CastsAttributes
     protected $model;
 
     /**
-     * @return \Whitecube\NovaFlexibleContent\Layouts\Collection|array<\Whitecube\NovaFlexibleContent\Layouts\Layout>
+     * @return \Marshmallow\NovaFlexibleContent\Layouts\Collection|array<\Marshmallow\NovaFlexibleContent\Layouts\Layout>
      */
     public function get($model, string $key, $value, array $attributes)
     {

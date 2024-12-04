@@ -1,56 +1,64 @@
 <template>
-    <field-wrapper>
-        <div class="py-6 px-8 w-full">
+    <FieldWrapper :stacked="field.stacked" v-if="field.visible" class="w-full">
+        <div class="w-full px-8 py-6">
             <div class="mb-6" v-if="fieldLabel">
-                <form-label :for="field.attribute" :class="{
-                      'mb-2': field.helpText && showHelpText
-                  }">
+                <FormLabel
+                    :label-for="labelFor || field.attribute"
+                    :class="{ 'mb-2': showHelpText && field.helpText }"
+                >
                     {{ fieldLabel }}
+                    <span v-if="field.required" class="text-sm text-red-500">
+                        {{ __("*") }}
+                    </span>
+                </FormLabel>
 
-                    <span v-if="field.required" class="text-danger text-sm">{{
-                        __('*')
-                    }}</span>
-                </form-label>
-
-                <help-text v-if="showHelpText">
-                    {{ field.helpText }}
-                </help-text>
+                <HelpText
+                    class="mt-2 help-text"
+                    v-if="showHelpText"
+                    v-html="field.helpText"
+                />
             </div>
 
-            <slot name="field"/>
+            <slot name="field" class="w-full" />
 
-            <help-text
-                class="error-text mt-2 text-danger"
+            <HelpText
+                class="mt-2 help-text-error"
                 v-if="showErrors && hasError"
             >
                 {{ firstError }}
-            </help-text>
+            </HelpText>
         </div>
-    </field-wrapper>
+    </FieldWrapper>
 </template>
 
 <script>
-import { HandlesValidationErrors, mapProps } from 'laravel-nova'
+    import { mapProps } from "laravel-nova";
+    import { HandlesValidationErrors, Errors } from "laravel-nova";
 
-export default {
-    mixins: [HandlesValidationErrors],
+    export default {
+        mixins: [HandlesValidationErrors],
 
-    props: {
-        field: { type: Object, required: true },
-        fieldName: { type: String },
-        showErrors: { type: Boolean, default: true },
-        ...mapProps(['showHelpText']),
-    },
-
-    computed: {
-        fieldLabel() {
-            // If the field name is purposefully empty, hide the label altogether
-            if (this.fieldName === '') {
-                return false;
-            }
-
-            return this.fieldName || this.field.singularLabel || this.field.name
+        props: {
+            field: { type: Object, required: true },
+            fieldName: { type: String },
+            showErrors: { type: Boolean, default: true },
+            labelFor: { default: null },
+            fullWidthContent: { type: Boolean, default: true },
+            ...mapProps(["showHelpText"]),
         },
-    },
-};
+        computed: {
+            fieldLabel() {
+                // If the field name is purposefully an empty string, then let's show it as such
+                if (this.fieldName === "") {
+                    return "";
+                }
+
+                return (
+                    this.fieldName ||
+                    this.field.name ||
+                    this.field.singularLabel
+                );
+            },
+        },
+    };
 </script>

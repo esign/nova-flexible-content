@@ -1,12 +1,32 @@
 export default class Group {
-
-    constructor(name, title, fields, field, key, collapsed = true) {
+    constructor(
+        name,
+        title,
+        fields,
+        field,
+        key,
+        collapsed = true,
+        layout,
+        title_data = null
+    ) {
         this.name = name;
         this.title = title;
         this.fields = fields;
         this.key = key || this.getTemporaryUniqueKey(field.attribute);
         this.collapsed = collapsed;
         this.readonly = field.readonly;
+
+        if (title_data) {
+            if (title_data.resolved) {
+                this.title_from_content = title_data.resolved;
+            } else {
+                for (var i = this.fields.length - 1; i >= 0; i--) {
+                    if (this.fields[i].sortableUriKey == title_data.field) {
+                        this.title_from_content = this.fields[i].value;
+                    }
+                }
+            }
+        }
 
         this.renameFields();
     }
@@ -32,25 +52,25 @@ export default class Group {
             layout: this.name,
             key: this.key,
             attributes: {},
-            files: {}
+            files: {},
         };
 
-        for(var item of this.values()) {
-            if(item[0].indexOf('___upload-') == 0) {
+        for (var item of this.values()) {
+            if (item[0].indexOf("___upload-") == 0) {
                 // Previously nested file attribute
                 data.files[item[0]] = item[1];
                 continue;
             }
 
-            if(!(item[1] instanceof File || item[1] instanceof Blob)) {
+            if (!(item[1] instanceof File || item[1] instanceof Blob)) {
                 // Simple input value, no need to attach files
                 data.attributes[item[0]] = item[1];
                 continue;
             }
 
             // File object, attach its file for upload
-            data.attributes[item[0]] = '___upload-' + item[0];
-            data.files['___upload-' + item[0]] = item[1];
+            data.attributes[item[0]] = "___upload-" + item[0];
+            data.files["___upload-" + item[0]] = item[1];
         }
 
         return data;
@@ -64,11 +84,13 @@ export default class Group {
     }
 
     randomString(len, charSet) {
-        charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var randomString = '';
-        for (var i = 0; i < len - 1; i++) {
+        charSet =
+            charSet ||
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var randomString = "";
+        for (var i = 0; i < len; i++) {
             var randomPoz = Math.floor(Math.random() * charSet.length);
-            randomString += charSet.substring(randomPoz,randomPoz+1);
+            randomString += charSet.substring(randomPoz, randomPoz + 1);
         }
         return 'c' + randomString;
     }
@@ -78,7 +100,8 @@ export default class Group {
      */
     renameFields() {
         for (var i = this.fields.length - 1; i >= 0; i--) {
-            this.fields[i].attribute = this.key + '__' + this.fields[i].attribute;
+            this.fields[i].attribute =
+                this.key + "__" + this.fields[i].attribute;
             this.fields[i].validationKey = this.fields[i].attribute;
 
             if (this.fields[i].dependsOn) {
@@ -89,5 +112,4 @@ export default class Group {
             }
         }
     }
-
 }

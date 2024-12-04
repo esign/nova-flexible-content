@@ -1,6 +1,11 @@
 <template>
     <div class="w-3/5" v-if="layouts">
-        <div v-if="this.limitCounter > 0 || this.limitCounter === null">
+        <div
+            v-if="
+                (this.limitCounter > 0 || this.limitCounter === null) &&
+                    field.allowedToCreate
+            "
+        >
             <div v-if="layouts.length === 1">
                 <default-button
                     dusk="toggle-layouts-dropdown-or-add-default"
@@ -15,15 +20,15 @@
                 <div style="min-width: 300px;">
                     <div class="flexible-search-menu-multiselect">
                         <Multiselect
-                             v-model="selectedLayout"
-                             :options="availableLayouts"
-                             :placeholder="field.button"
-                             @change="selectLayout"
-                             v-bind="attributes"
-                             track-by="name"
-                             :show-options="true"
-                             :searchable="true"
-                             ref="select"
+                            v-model="selectedLayout"
+                            :options="availableLayouts"
+                            :placeholder="field.button"
+                            @change="selectLayout"
+                            v-bind="attributes"
+                            track-by="name"
+                            :show-options="true"
+                            :searchable="true"
+                            ref="select"
                         ></Multiselect>
                     </div>
                 </div>
@@ -33,12 +38,24 @@
 </template>
 
 <script>
-    import Multiselect from '@vueform/multiselect'
+    import Multiselect from "@vueform/multiselect";
 
     export default {
-        props: ['layouts', 'field', 'resourceName', 'resourceId', 'resource', 'errors', 'limitCounter', 'limitPerLayoutCounter'],
+        props: [
+            "layouts",
+            "field",
+            "resourceName",
+            "resourceId",
+            "resource",
+            "errors",
+            "limitCounter",
+            "allowedToCreate",
+            "allowedToDelete",
+            "allowedToChangeOrder",
+            "limitPerLayoutCounter",
+        ],
 
-        emits: ['addGroup'],
+        emits: ["addGroup"],
 
         components: {
             Multiselect,
@@ -47,33 +64,43 @@
         data() {
             return {
                 selectedLayout: null,
-                isLayoutsDropdownOpen: false
+                isLayoutsDropdownOpen: false,
             };
         },
 
         computed: {
             attributes() {
                 return {
-                    selectLabel: this.field.menu.data.selectLabel || this.__('Press enter to select'),
-                    label: this.field.menu.data.label || 'title',
-                    openDirection: this.field.menu.data.openDirection || 'bottom',
-                }
+                    selectLabel:
+                        this.field.menu.data.selectLabel ||
+                        this.__("Press enter to select"),
+                    label: this.field.menu.data.label || "title",
+                    openDirection:
+                        this.field.menu.data.openDirection || "bottom",
+                };
             },
 
             availableLayouts() {
-                return this.layouts.filter(layout => {
-                    return this.limitPerLayoutCounter[layout.name] === null || this.limitPerLayoutCounter[layout.name] > 0
-                }).reduce((carry, layout) => {
-                    carry[layout.name] = layout.title;
+                return this.layouts
+                    .filter((layout) => {
+                        return (
+                            this.limitPerLayoutCounter[layout.name] === null ||
+                            this.limitPerLayoutCounter[layout.name] > 0
+                        );
+                    })
+                    .reduce((carry, layout) => {
+                        carry[layout.name] = layout.title;
 
-                    return carry;
-                }, {});
+                        return carry;
+                    }, {});
             },
         },
 
         methods: {
-            selectLayout(layoutName){
-                let layout = this.layouts.find(layout => layout.name === layoutName);
+            selectLayout(layoutName) {
+                let layout = this.layouts.find(
+                    (layout) => layout.name === layoutName
+                );
                 this.addGroup(layout);
             },
 
@@ -95,7 +122,7 @@
             addGroup(layout) {
                 if (!layout) return;
 
-                this.$emit('addGroup', layout);
+                this.$emit("addGroup", layout);
 
                 this.isLayoutsDropdownOpen = false;
 
@@ -104,12 +131,8 @@
                     this.selectedLayout = null;
                 }, 100);
             },
-        }
-    }
+        },
+    };
 </script>
 
-<style lang="scss">
-.flexible-search-menu-multiselect {
-  @import "@vueform/multiselect/themes/default.scss";
-}
-</style>
+<style src="@vueform/multiselect/themes/default.css"></style>

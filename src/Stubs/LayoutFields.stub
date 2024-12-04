@@ -1,0 +1,11 @@
+/**
+     * Get the fields displayed by the layout.
+     *
+     * @return array<\Laravel\Nova\Fields\Field>
+     */
+    public function fields()
+    {
+        return [
+            //
+        ];
+    }
