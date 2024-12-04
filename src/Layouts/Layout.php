@@ -12,21 +12,15 @@ use Illuminate\Database\Eloquent\Concerns\HasAttributes;
 use Illuminate\Database\Eloquent\Concerns\HidesAttributes;
 use Illuminate\Database\Eloquent\Model;
 use JsonSerializable;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\Heading;
-use Illuminate\Database\Eloquent\Model;
 use Marshmallow\Nova\Flexible\Flexible;
 use Laravel\Nova\Fields\FieldCollection;
-use Illuminate\Contracts\Support\Arrayable;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Marshmallow\HelperFunctions\Facades\URL;
 use Marshmallow\Nova\Flexible\Http\ScopedRequest;
 use Marshmallow\Nova\Flexible\Concerns\HasFlexible;
 use Marshmallow\Nova\Flexible\Http\FlexibleAttribute;
-use Illuminate\Database\Eloquent\Concerns\HasAttributes;
-use Illuminate\Database\Eloquent\Concerns\HidesAttributes;
 
 /**
  * @template TKey of array-key
@@ -530,22 +524,6 @@ class Layout implements LayoutInterface, JsonSerializable, ArrayAccess, Arrayabl
     }
 
     /**
-     * Force Fill the layout with an array of attributes.
-     *
-     * @param  array  $attributes
-     * @return $this
-     */
-    public function forceFill(array $attributes)
-    {
-        foreach ($attributes as $key => $value) {
-            $attribute = Str::replace('->', '.', $key);
-            Arr::set($this->attributes, $attribute, $value);
-        }
-
-        return $this;
-    }
-
-    /**
      * Get validation rules for fields concerned by given request
      *
      * @param ScopedRequest $request
@@ -906,16 +884,6 @@ class Layout implements LayoutInterface, JsonSerializable, ArrayAccess, Arrayabl
         }
 
         return $this;
-    }
-
-    /**
-     * Determine if accessing missing attributes is disabled.
-     *
-     * @return bool
-     */
-    public static function preventsAccessingMissingAttributes()
-    {
-        return false;
     }
 
     /**

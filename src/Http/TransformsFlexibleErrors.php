@@ -7,7 +7,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Lang;
 use Marshmallow\Nova\Flexible\Flexible;
 use Symfony\Component\HttpFoundation\Response;
-use Whitecube\NovaFlexibleContent\Flexible;
 
 trait TransformsFlexibleErrors
 {
