@@ -1,6 +1,7 @@
 # Esign Nova Flexible
 
-This is a fork from the package of `whitecube/nova-flexible-content`. This is forked so we can build are own functionalities in to this and make it optimal for our customers.
+This is a fork from the package of `whitecube/nova-flexible-content` and `marshmallow/nova-flexible`.
+This is forked so we can build our own functionalities in to this and make it optimal for our customers.
 
 ## Installation
 
