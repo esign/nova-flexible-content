@@ -327,6 +327,16 @@ class Layout implements LayoutInterface, JsonSerializable, ArrayAccess, Arrayabl
     }
 
     /**
+     * Retrieve the layout's fields as a collection.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function collectionFields()
+    {
+        return $this->fields;
+    }
+
+    /**
      * Check if this group matches the given key
      *
      * @param  string  $key
