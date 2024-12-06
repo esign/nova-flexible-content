@@ -35,7 +35,7 @@ class FieldCollection extends NovaFieldCollection
             }
 
             foreach ($groups as $group) {
-                if ($group->inUseKey() !== $attribute_parts[0]) {
+                if ((string) $group->inUseKey() !== $attribute_parts[0]) {
                     continue;
                 }
 
