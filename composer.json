@@ -1,5 +1,5 @@
 {
-    "name": "marshmallow/nova-flexible",
+    "name": "esign/nova-flexible",
     "description": "Flexible Content & Repeater Fields for Laravel Nova base on the flexible package from WhiteCube.",
     "license": "MIT",
     "keywords": [
